@@ -1,0 +1,75 @@
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+
+Severity = Literal["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+DebtType = Literal[
+    "complexity",
+    "duplication",
+    "naming",
+    "error_handling",
+    "architecture",
+    "dead_code",
+]
+
+
+class SecurityIssue(BaseModel):
+    file: str = ""
+    line: int = 1
+    issue: str = ""
+    severity: Severity = "LOW"
+    snippet: str = ""
+    explanation: str = ""
+
+
+class DebtIssue(BaseModel):
+    file: str = ""
+    line: int = 1
+    issue: str = ""
+    type: DebtType = "architecture"
+    snippet: str = ""
+    suggestion: str = ""
+
+
+class RepoOverview(BaseModel):
+    analysis_source: str = ""
+    primary_language: str = ""
+    repository_type: str = ""
+    file_count: int = 0
+    source_file_count: int = 0
+    directory_count: int = 0
+    languages: list[str] = Field(default_factory=list)
+    frameworks: list[str] = Field(default_factory=list)
+    tech_stack: list[str] = Field(default_factory=list)
+    architecture_style: str = ""
+    project_structure: str = ""
+    architectural_layers: list[str] = Field(default_factory=list)
+    main_modules: list[str] = Field(default_factory=list)
+    module_details: list[str] = Field(default_factory=list)
+    entry_points: list[str] = Field(default_factory=list)
+    api_endpoints: list[str] = Field(default_factory=list)
+    data_flow: list[str] = Field(default_factory=list)
+    external_integrations: list[str] = Field(default_factory=list)
+    environment_variables: list[str] = Field(default_factory=list)
+    setup_and_runtime: list[str] = Field(default_factory=list)
+    config_files: list[str] = Field(default_factory=list)
+    test_files: list[str] = Field(default_factory=list)
+    notable_files: list[str] = Field(default_factory=list)
+    overview: str = ""
+
+
+class CodeDiff(BaseModel):
+    issue_title: str = ""
+    file: str = ""
+    original_code: str = ""
+    refactored_code: str = ""
+    explanation: str = ""
+
+
+class FinalReport(BaseModel):
+    repo_overview: RepoOverview = Field(default_factory=RepoOverview)
+    security_issues: list[SecurityIssue] = Field(default_factory=list)
+    debt_issues: list[DebtIssue] = Field(default_factory=list)
+    executive_summary: str = ""
+    code_diffs: list[CodeDiff] = Field(default_factory=list)
