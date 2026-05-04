@@ -146,7 +146,19 @@ class OverviewRenderer:
             for step in how_it_works:
                 st.write(f"➡️ {step}")
 
-        # ── SECTION 3: Agents & Models ────────────────────────────────────────
+        # ── SECTION 3: Visual Architecture Flowchart ─────────────────────────
+        mermaid_arch = self.overview.get("mermaid_architecture")
+        if mermaid_arch and mermaid_arch.strip() and not mermaid_arch.startswith("No Mermaid"):
+            st.subheader("🕸️ Architecture Visualizer")
+            
+            # Clean up the mermaid string to ensure it renders correctly
+            # Sometimes LLMs wrap it in markdown codeblocks anyway despite instructions
+            cleaned_mermaid = mermaid_arch.replace("```mermaid", "").replace("```", "").strip()
+            
+            # Render using Streamlit's native markdown support for mermaid
+            st.markdown(f"```mermaid\n{cleaned_mermaid}\n```")
+
+        # ── SECTION 4: Agents & Models ────────────────────────────────────────
         agents_used = self.overview.get("agents_used")
         models_used = self.overview.get("models_used")
         if agents_used or models_used:

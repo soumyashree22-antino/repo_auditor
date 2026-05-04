@@ -40,6 +40,7 @@ class RepoOverview(BaseModel):
     agents_used: list[str] = Field(default_factory=list)
     models_used: list[str] = Field(default_factory=list)
     how_it_works: list[str] = Field(default_factory=list)
+    mermaid_architecture: str = ""
     # --- Technical fields ---
     analysis_source: str = ""
     primary_language: str = ""
