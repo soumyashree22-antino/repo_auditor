@@ -1,4 +1,7 @@
 import streamlit as st
+import os
+os.environ["NO_PROXY"] = "*"
+
 
 from orchestrator import run_audit
 
@@ -121,10 +124,62 @@ class OverviewRenderer:
         self.executive_summary = executive_summary
 
     def render(self) -> None:
-        st.subheader("Complete Repository Overview")
-        st.write(self.overview.get("overview") or "No overview was generated.")
+        # ── SECTION 1: Plain-English Project Summary ──────────────────────────
+        st.subheader("🧠 What Is This Project?")
+        what_is = self.overview.get("what_is_this_project")
+        aim = self.overview.get("project_aim")
+        if what_is:
+            st.success(what_is)
+        if aim:
+            st.info(f"**Why it exists:** {aim}")
+        if not what_is and not aim:
+            st.write(self.overview.get("overview") or "No overview was generated.")
+
         if self.overview.get("analysis_source"):
             st.caption(f"Analysis source: {self.overview.get('analysis_source')}")
+
+        # ── SECTION 2: How It Works ───────────────────────────────────────────
+        how_it_works = self.overview.get("how_it_works")
+        if how_it_works:
+            st.subheader("⚙️ How It Works")
+            st.write("Here is what happens, step by step, when someone uses this project:")
+            for step in how_it_works:
+                st.write(f"➡️ {step}")
+
+        # ── SECTION 3: Agents & Models ────────────────────────────────────────
+        agents_used = self.overview.get("agents_used")
+        models_used = self.overview.get("models_used")
+        if agents_used or models_used:
+            st.subheader("🤖 AI Workers & Models Used")
+            agent_col, model_col = st.columns(2)
+            with agent_col:
+                if agents_used:
+                    st.write("**AI Workers (Agents)**")
+                    for agent in agents_used:
+                        st.write(f"• {agent}")
+                else:
+                    st.caption("No AI agents detected.")
+            with model_col:
+                if models_used:
+                    st.write("**AI Models Used**")
+                    for model in models_used:
+                        st.write(f"• {model}")
+                else:
+                    st.caption("No specific AI models detected.")
+
+        # ── SECTION 4: README ─────────────────────────────────────────────────
+        readme = self.overview.get("readme_content")
+        if readme and readme.strip() and readme.strip() != "No README found.":
+            st.subheader("📄 README")
+            with st.expander("Click to read the full README", expanded=True):
+                st.markdown(readme)
+
+        st.divider()
+
+        # ── SECTION 5: Stats & Technical Details ─────────────────────────────
+        st.subheader("📊 Repository Stats")
+        if self.overview.get("main_objective"):
+            st.info(f"**Main Objective:** {self.overview.get('main_objective')}")
 
         stat1, stat2, stat3, stat4 = st.columns(4)
         stat1.metric("Repository type", self.overview.get("repository_type") or "Unknown")
@@ -157,7 +212,7 @@ class OverviewRenderer:
             else:
                 st.caption("No project structure was generated.")
 
-        st.subheader("Modules and Request Flow")
+        st.subheader("Modules and Data Flow")
         flow_left, flow_right = st.columns(2)
         with flow_left:
             self._render_list(

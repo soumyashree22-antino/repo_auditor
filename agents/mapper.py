@@ -46,7 +46,7 @@ class RepositoryMapper:
             raw_text = call_llm(
                 system_prompt=load_prompt("mapper_prompt.txt"),
                 user_message=build_mapper_message(file_contents, fallback),
-                max_tokens=500,
+                max_tokens=3000,
             )
             if not raw_text:
                 return {**state, "mapper_output": fallback}
@@ -810,6 +810,9 @@ def merge_overview(fallback: dict, parsed: dict) -> dict:
             merged[key] = value
 
     for key in (
+        "agents_used",
+        "models_used",
+        "how_it_works",
         "frameworks",
         "tech_stack",
         "languages",

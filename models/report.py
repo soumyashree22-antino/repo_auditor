@@ -33,6 +33,14 @@ class DebtIssue(BaseModel):
 
 
 class RepoOverview(BaseModel):
+    # --- Non-technical / human-friendly fields ---
+    what_is_this_project: str = ""
+    project_aim: str = ""
+    readme_content: str = ""
+    agents_used: list[str] = Field(default_factory=list)
+    models_used: list[str] = Field(default_factory=list)
+    how_it_works: list[str] = Field(default_factory=list)
+    # --- Technical fields ---
     analysis_source: str = ""
     primary_language: str = ""
     repository_type: str = ""
