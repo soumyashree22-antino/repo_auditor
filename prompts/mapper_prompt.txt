@@ -11,7 +11,7 @@ Return ONLY a valid JSON object with these exact fields:
 {
   "what_is_this_project": "In 2-3 sentences, explain what this project IS in the simplest possible terms. No technical words. Example: 'This is a tool that automatically reads code from the internet and tells you if there are any problems with it.'",
   "project_aim": "In 2-3 sentences, explain WHY this project exists. What problem does it solve? What is the goal behind building it? Write as if explaining to a business person.",
-  "readme_content": "Copy the EXACT, RAW text of the project's README.md file. Do not summarize it. Do not change a single word. If there is no README, write 'No README found.'",
+  "readme_content": "Copy the exact text of the README.md file. IMPORTANT: Escape all newlines as \\n. Do not use literal newlines inside this JSON string. If there is no README, write 'No README found.'",
   "agents_used": ["List every AI agent or automated worker found in the project. For each one, write a plain English sentence like: 'Code Reader Agent - reads all the files in a GitHub project and figures out what kind of project it is.' Do NOT use technical terms."],
   "models_used": ["List every AI model or language model used in this project. Example: 'Gemini 2.0 Flash - used to analyze code and find security problems', 'Ollama (local AI) - used to generate summaries'. If none found, return an empty list."],
   "how_it_works": ["Explain the data flow as a numbered plain English story, step by step. Example: '1. The user types a GitHub link into the app.', '2. The app downloads all the code files from that link.', '3. An AI reads the files and looks for security problems.', '4. The results are shown to the user in a simple report.' Each step should be a single sentence a 10-year-old could understand."],
@@ -29,7 +29,7 @@ Return ONLY a valid JSON object with these exact fields:
   "architecture_style": "Describe how the project is structured in plain English (e.g. 'The app has a simple web interface powered by Python on the back end.')",
   "project_structure": "An ASCII folder tree of the important files and folders",
   "architectural_layers": ["Describe each major part of the project in plain English. Example: 'The screen the user sees - this is where you type in a GitHub link and see the results.'"],
-  "mermaid_architecture": "Write a clean, beautiful Mermaid flowchart (graph TD) that visualizes how the different parts of this project connect and data flows between them. Use nice colors and styling if possible. DO NOT wrap it in markdown code blocks, just provide the raw mermaid syntax.",
+  "mermaid_architecture": "Write a Mermaid flowchart (graph TD) showing how the project connects. IMPORTANT: Escape all newlines as \\n. Do not use literal newlines inside this JSON string.",
   "main_modules": ["List the main folders/modules and what each one does in plain English"],
   "module_details": ["module name: what it does in plain English"],
   "component_map": ["file.py - what this file is responsible for"],
@@ -53,3 +53,4 @@ Rules:
 - For "models_used": look for references to OpenAI, Anthropic, Gemini, Ollama, LLaMA, GPT, Claude, or any model name in config files, requirements, or code.
 - For "how_it_works": tell the story of what happens from the moment a user opens the app to the moment they get a result. Make it feel like a simple journey.
 - NEVER use words like: API, endpoint, REST, microservice, backend, frontend, middleware, runtime, schema, async, JSON, LLM, LangGraph, Pydantic, token, or any other technical jargon in the non-technical fields (what_is_this_project, project_aim, agents_used, how_it_works, overview).
+- CRITICAL JSON RULE: You CANNOT use literal Enter/newline characters inside the JSON strings. Every single line break in the README or the Mermaid diagram MUST be written exactly as \n. Failure to do this will break the parser.
