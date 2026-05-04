@@ -25,7 +25,7 @@ class LLMClient:
         self.ollama_url = (ollama_url or os.getenv("OLLAMA_URL", "http://localhost:11434")).rstrip("/")
         self.ollama_model = ollama_model or os.getenv("OLLAMA_MODEL", "qwen2.5-coder:7b")
         self.nvidia_api_key = os.getenv("NVIDIA_API_KEY")
-        self.nvidia_model = os.getenv("NVIDIA_MODEL", "meta/llama-3.1-8b-instruct")
+        self.nvidia_model = os.getenv("NVIDIA_MODEL", "mistralai/mixtral-8x7b-instruct-v0.1")
         self.nvidia_timeout = timeout or _NVIDIA_TIMEOUT
         self.ollama_timeout = timeout or _OLLAMA_TIMEOUT
         self.num_ctx = num_ctx or int(os.getenv("OLLAMA_NUM_CTX", "4096"))
