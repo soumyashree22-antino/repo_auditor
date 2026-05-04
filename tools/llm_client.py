@@ -5,6 +5,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Separate timeouts: cloud APIs respond fast; Ollama runs locally and may be slower
+_NVIDIA_TIMEOUT = int(os.getenv("NVIDIA_TIMEOUT", "60"))
+_OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "300"))
+
 
 class LLMClient:
     """Provider-agnostic client for Ollama, Anthropic, or NVIDIA API calls."""
@@ -21,19 +25,22 @@ class LLMClient:
         self.ollama_url = (ollama_url or os.getenv("OLLAMA_URL", "http://localhost:11434")).rstrip("/")
         self.ollama_model = ollama_model or os.getenv("OLLAMA_MODEL", "qwen2.5-coder:7b")
         self.nvidia_api_key = os.getenv("NVIDIA_API_KEY")
-        self.nvidia_model = os.getenv("NVIDIA_MODEL", "qwen2_5-coder-32b-instruct")
-        self.timeout = timeout or int(os.getenv("OLLAMA_TIMEOUT", "300"))
+        self.nvidia_model = os.getenv("NVIDIA_MODEL", "meta/llama-3.1-8b-instruct")
+        self.nvidia_timeout = timeout or _NVIDIA_TIMEOUT
+        self.ollama_timeout = timeout or _OLLAMA_TIMEOUT
         self.num_ctx = num_ctx or int(os.getenv("OLLAMA_NUM_CTX", "4096"))
 
     def call(self, system_prompt: str, user_message: str, max_tokens: int = 4000) -> str:
         if self.provider == "anthropic":
             return self.call_anthropic(system_prompt, user_message, max_tokens)
         elif self.provider == "nvidia":
-            result = self.call_nvidia(system_prompt, user_message, max_tokens)
-            if result:  # If NVIDIA succeeds, return result
-                return result
-            # Fallback to Ollama if NVIDIA fails
-            return self.call_ollama(system_prompt, user_message, max_tokens)
+            # On Streamlit Cloud, Ollama is not available — do NOT fall back to it.
+            # If NVIDIA fails, return "" and let the caller use its own fallback.
+            if not self.nvidia_api_key:
+                print("NVIDIA_API_KEY is not set. Skipping LLM call.")
+                return ""
+            return self.call_nvidia(system_prompt, user_message, max_tokens)
+        # Default: Ollama (local)
         return self.call_ollama(system_prompt, user_message, max_tokens)
 
     def call_ollama(self, system_prompt: str, user_message: str, max_tokens: int) -> str:
@@ -49,22 +56,23 @@ class LLMClient:
             },
         }
 
-        response = requests.post(f"{self.ollama_url}/api/generate", json=payload, timeout=self.timeout)
+        response = requests.post(f"{self.ollama_url}/api/generate", json=payload, timeout=self.ollama_timeout)
         response.raise_for_status()
         return response.json().get("response", "").strip()
 
     def call_nvidia(self, system_prompt: str, user_message: str, max_tokens: int) -> str:
         """Call NVIDIA API with the specified model."""
         if not self.nvidia_api_key:
-            raise ValueError("NVIDIA_API_KEY not set in environment variables")
+            print("NVIDIA_API_KEY is not set. Skipping NVIDIA call.")
+            return ""
 
         api_url = "https://integrate.api.nvidia.com/v1/chat/completions"
-        
+
         headers = {
             "Authorization": f"Bearer {self.nvidia_api_key}",
             "Content-Type": "application/json",
         }
-        
+
         payload = {
             "model": self.nvidia_model,
             "messages": [
@@ -75,20 +83,28 @@ class LLMClient:
             "max_tokens": max_tokens,
             "top_p": 0.7,
         }
-        
+
         try:
-            response = requests.post(api_url, json=payload, headers=headers, timeout=self.timeout)
+            response = requests.post(api_url, json=payload, headers=headers, timeout=self.nvidia_timeout)
             response.raise_for_status()
             result = response.json()
             if "choices" in result and len(result["choices"]) > 0:
                 return result["choices"][0]["message"]["content"].strip()
             return ""
         except requests.exceptions.HTTPError as error:
-            if error.response.status_code == 404:
-                print(f"NVIDIA API Error: Model '{self.nvidia_model}' not found or endpoint incorrect")
-                print(f"Try using 'meta/llama-2-7b-chat' or check https://docs.api.nvidia.com for available models")
+            status = error.response.status_code if error.response is not None else "unknown"
+            if status == 404:
+                print(f"NVIDIA API Error: Model '{self.nvidia_model}' not found.")
+                print("Check available models at: https://build.nvidia.com/explore/discover")
+            elif status == 401:
+                print("NVIDIA API Error: Invalid or expired API key (401 Unauthorized).")
+            elif status == 402:
+                print("NVIDIA API Error: Usage limit reached (402). Check your NVIDIA account.")
             else:
-                print(f"NVIDIA API HTTP Error: {error}")
+                print(f"NVIDIA API HTTP Error {status}: {error}")
+            return ""
+        except requests.exceptions.Timeout:
+            print(f"NVIDIA API timed out after {self.nvidia_timeout}s.")
             return ""
         except requests.exceptions.RequestException as error:
             print(f"NVIDIA API call failed: {error}")
