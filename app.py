@@ -136,10 +136,17 @@ class OverviewRenderer:
 
         # ── SECTION 2: Flowchart ───────────────────────────────────────────
         flowchart = self.overview.get("flowchart")
-        if flowchart:
+        mermaid = self.overview.get("mermaid_flowchart")
+        
+        if flowchart or mermaid:
             st.subheader("⚙️ How It Works")
-            for step in flowchart:
-                st.write(f"➡️ {step}")
+            
+            if mermaid and "graph" in mermaid:
+                st.markdown(f"```mermaid\n{mermaid}\n```")
+            
+            if flowchart:
+                for step in flowchart:
+                    st.write(f"➡️ {step}")
 
         # ── SECTION 3: Architecture ─────────────────────────
         architecture = self.overview.get("architecture")
