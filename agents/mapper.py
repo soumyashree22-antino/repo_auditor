@@ -50,12 +50,17 @@ class RepositoryMapper:
                 max_tokens=3000,
             )
             if not raw_text:
-                return {**state, "mapper_output": fallback}
-            parsed = parse_json(raw_text, fallback)
-            merged = merge_overview(fallback, parsed)
-            if parsed is not fallback and parsed != fallback:
-                merged["analysis_source"] = "Ollama plus local static analysis"
-            mapper_output = RepoOverview.model_validate(merged).model_dump()
+                print("LLM call failed or returned empty response")
+                mapper_output = fallback
+            else:
+                print(f"LLM Response (first 200 chars):\n{raw_text[:200]}")
+                parsed = parse_json(raw_text, fallback)
+                merged = merge_overview(fallback, parsed)
+                if parsed is not fallback and parsed != fallback:
+                    import os
+                    provider = os.getenv("LLM_PROVIDER", "LLM API")
+                    merged["analysis_source"] = provider
+                mapper_output = RepoOverview.model_validate(merged).model_dump()
         except Exception as error:
             print(f"Mapper failed: {error}")
             mapper_output = fallback
