@@ -862,9 +862,12 @@ def as_list(value) -> list[str]:
 
 def parse_json(raw_text: str, fallback: dict) -> dict:
     try:
-        return extract_json_object(raw_text)
-    except json.JSONDecodeError:
-        print(f"Bad mapper JSON: {raw_text[:500]}")
+        result = extract_json_object(raw_text)
+        print(f"Successfully parsed LLM JSON with keys: {list(result.keys())}")
+        return result
+    except Exception as e:
+        print(f"Failed to parse LLM response: {type(e).__name__}: {e}")
+        print(f"Raw LLM text was: {raw_text[:500]}")
         return fallback
 
 
