@@ -32,6 +32,22 @@ class DebtIssue(BaseModel):
     suggestion: str = ""
 
 
+class ArchitectureLayer(BaseModel):
+    layer: str = ""
+    name: str = ""
+    role: str = ""
+
+class ArchitectureInfo(BaseModel):
+    title: str = ""
+    layers: list[ArchitectureLayer] = Field(default_factory=list)
+
+class TechStackItem(BaseModel):
+    category: str = ""
+    technology: str = ""
+    purpose: str = ""
+
+
+
 class RepoOverview(BaseModel):
     # --- Non-technical / human-friendly fields ---
     what_is_this_project: str = ""
@@ -41,6 +57,14 @@ class RepoOverview(BaseModel):
     models_used: list[str] = Field(default_factory=list)
     how_it_works: list[str] = Field(default_factory=list)
     mermaid_architecture: str = ""
+    
+    # --- New LLM Prompt Fields ---
+    overview: str = ""
+    architecture: ArchitectureInfo | dict = Field(default_factory=dict)
+    flowchart: list[str] = Field(default_factory=list)
+    how_to_run: list[str] = Field(default_factory=list)
+    tech_stack: list[TechStackItem | dict] = Field(default_factory=list)
+
     # --- Technical fields ---
     analysis_source: str = ""
     primary_language: str = ""
@@ -50,7 +74,6 @@ class RepoOverview(BaseModel):
     directory_count: int = 0
     languages: list[str] = Field(default_factory=list)
     frameworks: list[str] = Field(default_factory=list)
-    tech_stack: list[str] = Field(default_factory=list)
     architecture_style: str = ""
     project_structure: str = ""
     architectural_layers: list[str] = Field(default_factory=list)
@@ -65,7 +88,6 @@ class RepoOverview(BaseModel):
     config_files: list[str] = Field(default_factory=list)
     test_files: list[str] = Field(default_factory=list)
     notable_files: list[str] = Field(default_factory=list)
-    overview: str = ""
 
 
 class CodeDiff(BaseModel):

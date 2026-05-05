@@ -65,7 +65,8 @@ class RepositoryMapper:
                         "overview", "how_it_works", "agents_used", "models_used",
                         "architecture_style", "main_modules", "module_details",
                         "architectural_layers", "data_flow", "external_integrations",
-                        "frameworks", "tech_stack", "repository_type", "notable_files"
+                        "frameworks", "tech_stack", "repository_type", "notable_files",
+                        "architecture", "flowchart", "how_to_run"
                     ]
                     for field in non_technical_fields:
                         if field in parsed and parsed[field] not in ("", [], {}, None):
@@ -130,7 +131,10 @@ def build_fallback_overview(file_contents: dict[str, str]) -> dict:
         "directory_count": directory_count,
         "languages": summarize_languages(file_contents),
         "frameworks": frameworks,
-        "tech_stack": merge_unique(frameworks + dependencies)[:30],
+        "tech_stack": [
+            {"category": "Detected Dependency", "technology": item, "purpose": "Found in project files"}
+            for item in merge_unique(frameworks + dependencies)[:30]
+        ],
         "architecture_style": architecture_style,
         "project_structure": get_project_tree(file_contents),
         "architectural_layers": detect_architectural_layers(frameworks, top_folders, file_paths),

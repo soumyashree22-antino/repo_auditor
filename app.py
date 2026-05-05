@@ -125,59 +125,48 @@ class OverviewRenderer:
 
     def render(self) -> None:
         # ── SECTION 1: Plain-English Project Summary ──────────────────────────
-        st.subheader("🧠 What Is This Project?")
-        what_is = self.overview.get("what_is_this_project")
-        aim = self.overview.get("project_aim")
-        if what_is:
-            st.success(what_is)
-        if aim:
-            st.info(f"**Why it exists:** {aim}")
-        if not what_is and not aim:
-            st.write(self.overview.get("overview") or "No overview was generated.")
+        st.subheader("🧠 Project Overview")
+        overview = self.overview.get("overview")
+        if overview:
+            st.success(overview)
+        else:
+            st.write("No overview was generated.")
 
         if self.overview.get("analysis_source"):
             st.caption(f"Analysis source: {self.overview.get('analysis_source')}")
 
-        # ── SECTION 2: How It Works ───────────────────────────────────────────
-        how_it_works = self.overview.get("how_it_works")
-        if how_it_works:
+        # ── SECTION 2: Flowchart ───────────────────────────────────────────
+        flowchart = self.overview.get("flowchart")
+        if flowchart:
             st.subheader("⚙️ How It Works")
-            st.write("Here is what happens, step by step, when someone uses this project:")
-            for step in how_it_works:
+            for step in flowchart:
                 st.write(f"➡️ {step}")
 
-        # ── SECTION 3: Visual Architecture Flowchart ─────────────────────────
-        mermaid_arch = self.overview.get("mermaid_architecture")
-        if mermaid_arch and mermaid_arch.strip() and not mermaid_arch.startswith("No Mermaid"):
-            st.subheader("🕸️ Architecture Visualizer")
-            
-            # Clean up the mermaid string to ensure it renders correctly
-            # Sometimes LLMs wrap it in markdown codeblocks anyway despite instructions
-            cleaned_mermaid = mermaid_arch.replace("```mermaid", "").replace("```", "").strip()
-            
-            # Render using Streamlit's native markdown support for mermaid
-            st.markdown(f"```mermaid\n{cleaned_mermaid}\n```")
+        # ── SECTION 3: Architecture ─────────────────────────
+        architecture = self.overview.get("architecture")
+        if architecture and isinstance(architecture, dict):
+            arch_title = architecture.get("title", "Architecture")
+            st.subheader(f"🏗️ {arch_title}")
+            layers = architecture.get("layers", [])
+            for layer in layers:
+                st.write(f"**{layer.get('layer', 'Layer')} ({layer.get('name', 'Unknown')})**: {layer.get('role', '')}")
 
-        # ── SECTION 4: Agents & Models ────────────────────────────────────────
-        agents_used = self.overview.get("agents_used")
-        models_used = self.overview.get("models_used")
-        if agents_used or models_used:
-            st.subheader("🤖 AI Workers & Models Used")
-            agent_col, model_col = st.columns(2)
-            with agent_col:
-                if agents_used:
-                    st.write("**AI Workers (Agents)**")
-                    for agent in agents_used:
-                        st.write(f"• {agent}")
+        # ── SECTION 4: How to Run ────────────────────────────────────────
+        how_to_run = self.overview.get("how_to_run")
+        if how_to_run:
+            st.subheader("🚀 How to Run")
+            for step in how_to_run:
+                st.write(f"• {step}")
+
+        # ── SECTION 5: Tech Stack ────────────────────────────────────────
+        tech_stack = self.overview.get("tech_stack")
+        if tech_stack:
+            st.subheader("💻 Tech Stack")
+            for item in tech_stack:
+                if isinstance(item, dict):
+                    st.write(f"**{item.get('category', 'Technology')} - {item.get('technology', 'Unknown')}**: {item.get('purpose', '')}")
                 else:
-                    st.caption("No AI agents detected.")
-            with model_col:
-                if models_used:
-                    st.write("**AI Models Used**")
-                    for model in models_used:
-                        st.write(f"• {model}")
-                else:
-                    st.caption("No specific AI models detected.")
+                    st.write(f"• {item}")
 
         # ── SECTION 4: README ─────────────────────────────────────────────────
         readme = self.overview.get("readme_content")
