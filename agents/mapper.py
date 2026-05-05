@@ -55,12 +55,25 @@ class RepositoryMapper:
             else:
                 print(f"LLM Response (first 200 chars):\n{raw_text[:200]}")
                 parsed = parse_json(raw_text, fallback)
-                merged = merge_overview(fallback, parsed)
-                if parsed is not fallback and parsed != fallback:
+                
+                if parsed is fallback or parsed == fallback:
+                    mapper_output = fallback
+                else:
+                    final = dict(fallback)
+                    non_technical_fields = [
+                        "what_is_this_project", "project_aim", "main_objective",
+                        "overview", "how_it_works", "agents_used", "models_used",
+                        "architecture_style", "main_modules", "module_details",
+                        "architectural_layers", "data_flow", "external_integrations",
+                        "frameworks", "tech_stack", "repository_type", "notable_files"
+                    ]
+                    for field in non_technical_fields:
+                        if field in parsed and parsed[field] not in ("", [], {}, None):
+                            final[field] = parsed[field]
+                            
                     import os
-                    provider = os.getenv("LLM_PROVIDER", "LLM API")
-                    merged["analysis_source"] = provider
-                mapper_output = RepoOverview.model_validate(merged).model_dump()
+                    final["analysis_source"] = os.getenv("LLM_PROVIDER", "nvidia")
+                    mapper_output = RepoOverview.model_validate(final).model_dump()
         except Exception as error:
             print(f"Mapper failed: {error}")
             mapper_output = fallback
