@@ -182,6 +182,7 @@ class OverviewRenderer:
         # ── SECTION 4: README ─────────────────────────────────────────────────
         readme = self.overview.get("readme_content")
         if readme and readme.strip() and readme.strip() != "No README found.":
+            readme = UIUtils.fix_unicode_escapes(readme)
             st.subheader("📄 README")
             with st.expander("Click to read the full README", expanded=True):
                 st.markdown(readme)
@@ -385,6 +386,25 @@ class UIUtils:
         if isinstance(items, str) and items.strip():
             return [items.strip()]
         return []
+
+    @staticmethod
+    def fix_unicode_escapes(text: str) -> str:
+        if not text:
+            return text
+        replacements = {
+            r"\u2014": "—",
+            r"\u2013": "–",
+            r"\u2192": "→",
+            r"\u26a0": "⚠",
+            r"\u2705": "✅",
+            r"\u251c": "├",
+            r"\u2500": "─",
+            r"\u2502": "│",
+            r"\u2514": "└"
+        }
+        for escaped, actual in replacements.items():
+            text = text.replace(escaped, actual)
+        return text
 
 
 if __name__ == "__main__":
