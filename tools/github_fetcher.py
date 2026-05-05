@@ -338,3 +338,19 @@ def _should_skip_file(path: str, size: int) -> bool:
 
 def _fetch_file_content(download_url: str | None) -> str | None:
     return GitHubRepositoryFetcher()._fetch_file_content(download_url)
+
+
+def get_readme_content(file_contents: dict[str, str]) -> str:
+    readme_names = ["README.md", "readme.md", "README", "README.txt"]
+    
+    # First pass: exact match
+    for filename in readme_names:
+        if filename in file_contents:
+            return file_contents[filename]
+            
+    # Second pass: case-insensitive match for files in the root directory
+    for path, content in file_contents.items():
+        if "/" not in path and path.lower() in [n.lower() for n in readme_names]:
+            return content
+            
+    return "No README found."

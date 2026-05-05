@@ -22,6 +22,7 @@ from tools.code_parser import (
 )
 from tools.json_utils import extract_json_object
 from tools.llm_client import call_llm
+from tools.github_fetcher import get_readme_content
 
 load_dotenv()
 
@@ -58,6 +59,9 @@ class RepositoryMapper:
         except Exception as error:
             print(f"Mapper failed: {error}")
             mapper_output = fallback
+
+        # Override readme_content with the raw fetched text to prevent LLM truncation
+        mapper_output["readme_content"] = get_readme_content(file_contents)
 
         return {**state, "mapper_output": mapper_output}
 
