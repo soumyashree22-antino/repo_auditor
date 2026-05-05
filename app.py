@@ -109,11 +109,10 @@ class ScoreboardRenderer:
         critical_count = sum(1 for issue in self.security_issues if issue.get("severity") == "CRITICAL")
         high_count = sum(1 for issue in self.security_issues if issue.get("severity") == "HIGH")
 
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Primary language", self.overview.get("primary_language") or "Unknown")
-        col2.metric("Security findings", len(self.security_issues))
-        col3.metric("Critical / High", f"{critical_count} / {high_count}")
-        col4.metric("Debt findings", len(self.debt_issues))
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Security findings", len(self.security_issues))
+        col2.metric("Critical / High", f"{critical_count} / {high_count}")
+        col3.metric("Debt findings", len(self.debt_issues))
 
 
 class OverviewRenderer:
@@ -168,71 +167,9 @@ class OverviewRenderer:
                 else:
                     st.write(f"• {item}")
 
-        # ── SECTION 4: README ─────────────────────────────────────────────────
-        readme = self.overview.get("readme_content")
-        if readme and readme.strip() and readme.strip() != "No README found.":
-            readme = UIUtils.fix_unicode_escapes(readme)
-            st.subheader("📄 README")
-            with st.expander("Click to read the full README", expanded=True):
-                st.markdown(readme)
-
         st.divider()
 
-        # ── SECTION 5: Stats & Technical Details ─────────────────────────────
-        st.subheader("📊 Repository Stats")
-        if self.overview.get("main_objective"):
-            st.info(f"**Main Objective:** {self.overview.get('main_objective')}")
-
-        stat1, stat2, stat3, stat4 = st.columns(4)
-        stat1.metric("Repository type", self.overview.get("repository_type") or "Unknown")
-        stat2.metric("Files read", self.overview.get("file_count") or 0)
-        stat3.metric("Source files", self.overview.get("source_file_count") or 0)
-        stat4.metric("Directories", self.overview.get("directory_count") or 0)
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.write("Architecture style")
-            st.info(self.overview.get("architecture_style") or "Unknown")
-            self._render_list("Languages", self.overview.get("languages"))
-            self._render_list("Frameworks", self.overview.get("frameworks"))
-            self._render_list("Tech stack", self.overview.get("tech_stack"))
-
-        with col2:
-            self._render_list("Entry points", self.overview.get("entry_points"))
-            self._render_list("Setup and runtime", self.overview.get("setup_and_runtime"))
-            self._render_list("Environment variables", self.overview.get("environment_variables"))
-
-        st.subheader("Architecture and Project Structure")
-        arch_left, arch_right = st.columns([1, 1])
-        with arch_left:
-            self._render_list("Architectural layers", self.overview.get("architectural_layers"))
-        with arch_right:
-            project_structure = self.overview.get("project_structure")
-            st.write("Project structure")
-            if project_structure:
-                st.code(project_structure, language="text")
-            else:
-                st.caption("No project structure was generated.")
-
-        st.subheader("Modules and Data Flow")
-        flow_left, flow_right = st.columns(2)
-        with flow_left:
-            self._render_list(
-                "Main modules",
-                self.overview.get("module_details") or self.overview.get("main_modules"),
-            )
-        with flow_right:
-            self._render_list("Data flow", self.overview.get("data_flow"))
-
-        st.subheader("Surface Area")
-        surface_left, surface_right = st.columns(2)
-        with surface_left:
-            self._render_list("API endpoints", self.overview.get("api_endpoints"))
-            self._render_list("External integrations", self.overview.get("external_integrations"))
-        with surface_right:
-            self._render_list("Config files", self.overview.get("config_files"))
-            self._render_list("Test files", self.overview.get("test_files"))
-            self._render_list("Files to read first", self.overview.get("notable_files"))
+        st.divider()
 
         st.subheader("Executive Summary")
         st.write(self.executive_summary or "No executive summary was generated.")

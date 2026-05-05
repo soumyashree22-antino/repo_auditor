@@ -49,15 +49,6 @@ class TechStackItem(BaseModel):
 
 
 class RepoOverview(BaseModel):
-    # --- Non-technical / human-friendly fields ---
-    what_is_this_project: str = ""
-    project_aim: str = ""
-    readme_content: str = ""
-    agents_used: list[str] = Field(default_factory=list)
-    models_used: list[str] = Field(default_factory=list)
-    how_it_works: list[str] = Field(default_factory=list)
-    mermaid_architecture: str = ""
-    
     # --- New LLM Prompt Fields ---
     overview: str = ""
     architecture: ArchitectureInfo | dict = Field(default_factory=dict)
@@ -67,27 +58,7 @@ class RepoOverview(BaseModel):
 
     # --- Technical fields ---
     analysis_source: str = ""
-    primary_language: str = ""
-    repository_type: str = ""
-    file_count: int = 0
-    source_file_count: int = 0
-    directory_count: int = 0
-    languages: list[str] = Field(default_factory=list)
-    frameworks: list[str] = Field(default_factory=list)
-    architecture_style: str = ""
-    project_structure: str = ""
-    architectural_layers: list[str] = Field(default_factory=list)
-    main_modules: list[str] = Field(default_factory=list)
-    module_details: list[str] = Field(default_factory=list)
-    entry_points: list[str] = Field(default_factory=list)
-    api_endpoints: list[str] = Field(default_factory=list)
-    data_flow: list[str] = Field(default_factory=list)
-    external_integrations: list[str] = Field(default_factory=list)
-    environment_variables: list[str] = Field(default_factory=list)
-    setup_and_runtime: list[str] = Field(default_factory=list)
-    config_files: list[str] = Field(default_factory=list)
-    test_files: list[str] = Field(default_factory=list)
-    notable_files: list[str] = Field(default_factory=list)
+
 
 
 class CodeDiff(BaseModel):

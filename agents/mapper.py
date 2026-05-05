@@ -61,12 +61,7 @@ class RepositoryMapper:
                 else:
                     final = dict(fallback)
                     non_technical_fields = [
-                        "what_is_this_project", "project_aim", "main_objective",
-                        "overview", "how_it_works", "agents_used", "models_used",
-                        "architecture_style", "main_modules", "module_details",
-                        "architectural_layers", "data_flow", "external_integrations",
-                        "frameworks", "tech_stack", "repository_type", "notable_files",
-                        "architecture", "flowchart", "how_to_run"
+                        "overview", "architecture", "flowchart", "how_to_run", "tech_stack"
                     ]
                     for field in non_technical_fields:
                         if field in parsed and parsed[field] not in ("", [], {}, None):
@@ -78,6 +73,7 @@ class RepositoryMapper:
         except Exception as error:
             print(f"Mapper failed: {error}")
             mapper_output = fallback
+            mapper_output["analysis_source"] = f"Local static analysis (Fallback Reason: {type(error).__name__} - {str(error)[:100]})"
 
         # Override readme_content with the raw fetched text to prevent LLM truncation
         mapper_output["readme_content"] = get_readme_content(file_contents)
@@ -96,68 +92,28 @@ def build_mapper_message(file_contents: dict[str, str], local_analysis: dict) ->
 
 def build_fallback_overview(file_contents: dict[str, str]) -> dict:
     file_paths = sorted(file_contents.keys())
-    top_folders = sorted({path.split("/", 1)[0] for path in file_paths if "/" in path})
-    entry_points = [
-        path
-        for path in file_paths
-        if path.rsplit("/", 1)[-1].lower()
-        in {
-            "app.py",
-            "main.py",
-            "index.js",
-            "index.ts",
-            "server.js",
-            "server.ts",
-            "main.go",
-            "main.rs",
-            "manage.py",
-            "wsgi.py",
-            "asgi.py",
-        }
-    ]
+    primary_language = guess_primary_language(file_contents)
     frameworks = detect_frameworks(file_contents)
     dependencies = detect_dependencies(file_contents)
-    source_file_count = sum(1 for path in file_paths if is_code_file(path))
-    directory_count = count_directories(file_paths)
-    architecture_style = detect_architecture_style(frameworks, top_folders, file_paths)
-    primary_language = guess_primary_language(file_contents)
 
     return {
         "analysis_source": "Local static analysis",
-        "primary_language": primary_language,
-        "repository_type": detect_repository_type(frameworks, top_folders, file_paths),
-        "file_count": len(file_paths),
-        "source_file_count": source_file_count,
-        "directory_count": directory_count,
-        "languages": summarize_languages(file_contents),
-        "frameworks": frameworks,
+        "overview": build_local_overview(
+            primary_language,
+            frameworks,
+            "",
+            len(file_paths),
+            0,
+            [],
+            [],
+        ),
+        "architecture": {},
+        "flowchart": [],
+        "how_to_run": [],
         "tech_stack": [
             {"category": "Detected Dependency", "technology": item, "purpose": "Found in project files"}
             for item in merge_unique(frameworks + dependencies)[:30]
         ],
-        "architecture_style": architecture_style,
-        "project_structure": get_project_tree(file_contents),
-        "architectural_layers": detect_architectural_layers(frameworks, top_folders, file_paths),
-        "main_modules": [humanize_path_name(folder) for folder in top_folders[:10]],
-        "module_details": build_module_details(top_folders, file_paths),
-        "entry_points": entry_points[:10],
-        "api_endpoints": detect_api_endpoints(file_contents),
-        "data_flow": infer_data_flow(frameworks, entry_points),
-        "external_integrations": detect_external_integrations(file_contents, dependencies),
-        "environment_variables": detect_environment_variables(file_contents),
-        "setup_and_runtime": detect_setup_and_runtime(file_contents),
-        "config_files": detect_config_files(file_paths),
-        "test_files": detect_test_files(file_paths),
-        "notable_files": detect_notable_files(file_paths, entry_points),
-        "overview": build_local_overview(
-            primary_language,
-            frameworks,
-            architecture_style,
-            len(file_paths),
-            source_file_count,
-            top_folders,
-            entry_points,
-        ),
     }
 
 
@@ -796,14 +752,11 @@ def build_local_overview(
     entry_points: list[str],
 ) -> str:
     language = primary_language or "mixed-language"
-    framework_text = ", ".join(frameworks) if frameworks else "no major framework detected"
-    module_text = ", ".join(top_folders[:5]) if top_folders else "root-level files"
-    entry_text = ", ".join(entry_points[:3]) if entry_points else "no obvious entry point"
+    framework_text = ", ".join(frameworks) if frameworks else "various tools"
     return (
-        f"This repository appears to be a {language} project using {framework_text}. "
-        f"It contains {file_count} readable file(s), including {source_file_count} source file(s), "
-        f"organized mainly around {module_text}. "
-        f"The likely architecture is: {architecture_style}. Primary runtime entry point(s): {entry_text}."
+        f"This is a {language} project using {framework_text}. "
+        f"It contains {file_count} files. "
+        "The AI was unable to generate a detailed summary, so this is a basic fallback description."
     )
 
 
@@ -872,6 +825,7 @@ def parse_json(raw_text: str, fallback: dict) -> dict:
     except Exception as e:
         print(f"Failed to parse LLM response: {type(e).__name__}: {e}")
         print(f"Raw LLM text was: {raw_text[:500]}")
+        fallback["analysis_source"] = f"Local static analysis (JSON Parse Error: {type(e).__name__} - {str(e)[:100]})"
         return fallback
 
 
