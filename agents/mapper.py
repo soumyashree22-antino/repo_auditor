@@ -56,7 +56,7 @@ class RepositoryMapper:
                 print(f"LLM Response (first 200 chars):\n{raw_text[:200]}")
                 parsed = parse_json(raw_text, fallback)
                 
-                if parsed is fallback or parsed == fallback:
+                if parsed is fallback:
                     mapper_output = fallback
                 else:
                     final = dict(fallback)
@@ -87,11 +87,7 @@ def build_mapper_message(file_contents: dict[str, str], local_analysis: dict) ->
     key_files = get_key_files(file_contents)
     file_tree = get_file_tree(file_contents)
 
-    message = (
-        "LOCAL STATIC ANALYSIS:\n"
-        f"{json.dumps(local_analysis, indent=2)}\n\n"
-        f"FILE TREE:\n{file_tree}\n\nKEY FILES:\n"
-    )
+    message = f"FILE TREE:\n{file_tree}\n\nKEY FILES:\n"
     for path, content in key_files.items():
         message += f"\n--- {path} ---\n{content[:3000]}\n"
     return message
