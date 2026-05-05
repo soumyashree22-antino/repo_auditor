@@ -53,7 +53,6 @@ class RepoOverview(BaseModel):
     overview: str = ""
     architecture: ArchitectureInfo | dict = Field(default_factory=dict)
     flowchart: list[str] = Field(default_factory=list)
-    mermaid_flowchart: str = ""
     how_to_run: list[str] = Field(default_factory=list)
     tech_stack: list[TechStackItem | dict] = Field(default_factory=list)
 

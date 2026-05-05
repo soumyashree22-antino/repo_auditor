@@ -61,7 +61,7 @@ class RepositoryMapper:
                 else:
                     final = dict(fallback)
                     non_technical_fields = [
-                        "overview", "architecture", "flowchart", "mermaid_flowchart", "how_to_run", "tech_stack"
+                        "overview", "architecture", "flowchart", "how_to_run", "tech_stack"
                     ]
                     for field in non_technical_fields:
                         if field in parsed and parsed[field] not in ("", [], {}, None):
@@ -109,7 +109,6 @@ def build_fallback_overview(file_contents: dict[str, str]) -> dict:
         ),
         "architecture": {},
         "flowchart": [],
-        "mermaid_flowchart": "",
         "how_to_run": [],
         "tech_stack": [
             {"category": "Detected Dependency", "technology": item, "purpose": "Found in project files"}

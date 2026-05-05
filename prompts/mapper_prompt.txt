@@ -33,8 +33,6 @@ Return ONLY a valid JSON object with these exact fields:
     "Step 6: Final output or result the user sees."
   ],
 
-  "mermaid_flowchart": "A Mermaid graph TD diagram representing the project's data flow. Use simple, non-technical labels for the nodes. Start with 'graph TD;'. Example: graph TD; A[User Input] --> B[Data Processing] --> C[Final Result];",
-
   "how_to_run": [
     "Step 1: First command or instruction to set up the project.",
     "Step 2: Second command or instruction.",
