@@ -33,6 +33,8 @@ Return ONLY a valid JSON object with these exact fields:
     "Step 6: Final output or result the user sees."
   ],
 
+  "graphviz_flowchart": "A Graphviz DOT string for a flowchart representing the data flow. Use rankdir=LR and rounded boxes. IMPORTANT: Escape double quotes inside the string. Example: digraph G { rankdir=LR; node [shape=box, style=rounded]; A [label=\\\"User Input\\\"]; B [label=\\\"Processing\\\"]; A -> B; }",
+
   "how_to_run": [
     "Step 1: First command or instruction to set up the project.",
     "Step 2: Second command or instruction.",

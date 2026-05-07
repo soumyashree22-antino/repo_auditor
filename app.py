@@ -136,10 +136,20 @@ class OverviewRenderer:
 
         # ── SECTION 2: Flowchart ───────────────────────────────────────────
         flowchart = self.overview.get("flowchart")
-        if flowchart:
+        graphviz = self.overview.get("graphviz_flowchart")
+        
+        if flowchart or graphviz:
             st.subheader("⚙️ How It Works")
-            for step in flowchart:
-                st.write(f"➡️ {step}")
+            
+            if graphviz and "digraph" in graphviz:
+                try:
+                    st.graphviz_chart(graphviz)
+                except Exception as e:
+                    st.error(f"Error rendering flowchart: {e}")
+            
+            if flowchart:
+                for step in flowchart:
+                    st.write(f"➡️ {step}")
 
         # ── SECTION 3: Architecture ─────────────────────────
         architecture = self.overview.get("architecture")
